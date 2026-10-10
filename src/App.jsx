@@ -225,10 +225,5 @@ export default function App() {
 }
 `)} variant="outline"><icon name="copy" size="sm" /> Copy code</button>
   </row>
-  <text color="secondary" size="sm">Agar code block select nahi hota, uske andar mouse se drag karke select karo aur Ctrl+C dabao.</text>
-</box>
-
-5. GitHub editor mein click karke `Ctrl+V` dabao.
-6. **Commit changes** karke save kar do.
-
-Yeh abhi prototype hai—real login, actual 3D model aur internet par dusre users se chat abhi connected nahi hain.
+ 
+.

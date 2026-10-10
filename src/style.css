@@ -1,5 +1,4 @@
-```css
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+ @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
 
 :root {
   font-family: 'DM Sans', sans-serif;
@@ -7,7 +6,6 @@
   background: #090d18;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-
   --muted: #9299b5;
   --panel: #111729;
   --line: rgba(255,255,255,.09);
@@ -24,17 +22,14 @@ html,
 body,
 #root {
   margin: 0;
+  width: 100%;
   min-width: 320px;
   min-height: 100vh;
 }
 
 body {
-  background:
-    radial-gradient(
-      ellipse at 50% -10%,
-      #25234b 0%,
-      #090d18 55%
-    );
+  overflow-x: hidden;
+  background: radial-gradient(ellipse at 50% -10%, #25234b 0%, #090d18 55%);
 }
 
 button,
@@ -58,9 +53,7 @@ button:active {
   transform: scale(.98);
 }
 
-/* =====================================================
-   LOADING
-===================================================== */
+/* LOADING */
 
 .loading-screen {
   min-height: 100vh;
@@ -68,8 +61,8 @@ button:active {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background:
-    radial-gradient(circle at center, #211e45, #090d18 60%);
+  padding: 24px;
+  background: radial-gradient(circle at center, #211e45, #090d18 60%);
   text-align: center;
 }
 
@@ -81,13 +74,8 @@ button:active {
   border-radius: 50%;
   color: #20182c;
   font-size: 30px;
-  background: linear-gradient(
-    135deg,
-    #efb4d8,
-    #b9aaff
-  );
-  box-shadow:
-    0 0 70px rgba(193, 157, 255, .45);
+  background: linear-gradient(135deg, #efb4d8, #b9aaff);
+  box-shadow: 0 0 70px rgba(193,157,255,.45);
   animation: floatOrb 2s ease-in-out infinite;
 }
 
@@ -103,18 +91,11 @@ button:active {
 }
 
 @keyframes floatOrb {
-  0%, 100% {
-    transform: translateY(0) scale(1);
-  }
-
-  50% {
-    transform: translateY(-10px) scale(1.04);
-  }
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-10px) scale(1.04); }
 }
 
-/* =====================================================
-   AUTH
-===================================================== */
+/* AUTH */
 
 .auth-page {
   min-height: 100vh;
@@ -123,13 +104,7 @@ button:active {
   display: grid;
   place-items: center;
   padding: 24px;
-  background:
-    radial-gradient(
-      circle at 50% 0%,
-      #292650 0%,
-      #111426 35%,
-      #090d18 75%
-    );
+  background: radial-gradient(circle at 50% 0%, #292650 0%, #111426 35%, #090d18 75%);
 }
 
 .auth-glow {
@@ -139,6 +114,7 @@ button:active {
   border-radius: 50%;
   filter: blur(100px);
   opacity: .18;
+  pointer-events: none;
 }
 
 .glow-one {
@@ -160,29 +136,22 @@ button:active {
   padding: 38px;
   border: 1px solid var(--line);
   border-radius: 25px;
-  background: rgba(17, 23, 41, .86);
-  box-shadow:
-    0 30px 100px rgba(0,0,0,.35),
-    inset 0 1px rgba(255,255,255,.04);
+  background: rgba(17,23,41,.86);
+  box-shadow: 0 30px 100px rgba(0,0,0,.35), inset 0 1px rgba(255,255,255,.04);
   backdrop-filter: blur(20px);
 }
 
 .brand-mark {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
   width: 54px;
   height: 54px;
   margin-bottom: 22px;
   border-radius: 17px;
   color: #241a39;
   font-size: 27px;
-  background: linear-gradient(
-    135deg,
-    #efb4d8,
-    #bcaaff
-  );
-  box-shadow: 0 12px 35px rgba(187, 159, 255, .25);
+  background: linear-gradient(135deg, #efb4d8, #bcaaff);
+  box-shadow: 0 12px 35px rgba(187,159,255,.25);
 }
 
 .auth-card h1 {
@@ -198,19 +167,23 @@ button:active {
   line-height: 1.7;
 }
 
-.auth-card form {
+.auth-card form,
+.avatar-editor form {
   display: flex;
   flex-direction: column;
 }
 
-.auth-card label {
+.auth-card label,
+.avatar-editor label {
   margin: 0 0 7px;
   color: #c9cce0;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
-.auth-card input {
+.auth-card input,
+.avatar-editor input,
+.avatar-editor textarea {
   width: 100%;
   margin-bottom: 16px;
   padding: 13px 14px;
@@ -221,35 +194,38 @@ button:active {
   background: #ffffff07;
 }
 
-.auth-card input:focus {
+.auth-card input:focus,
+.avatar-editor input:focus,
+.avatar-editor textarea:focus {
   border-color: #bcaaff66;
   background: #ffffff0a;
 }
 
-.auth-card input::placeholder {
-  color: #646c88;
+.auth-card input::placeholder,
+.avatar-editor input::placeholder,
+.avatar-editor textarea::placeholder {
+  color: #68718c;
 }
 
-.primary-button {
+.primary-button,
+.save-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  padding: 13px 16px;
   border: 0;
   border-radius: 11px;
-  padding: 13px 16px;
   color: #20182c;
+  background: linear-gradient(100deg, #efb4d8, #c5b5ff);
   font-size: 12px;
   font-weight: 800;
-  background: linear-gradient(
-    100deg,
-    #efb4d8,
-    #c5b5ff
-  );
   box-shadow: 0 9px 28px rgba(200,165,255,.18);
 }
 
-.primary-button:hover {
+.primary-button:hover,
+.save-button:hover,
+.hero-button:hover {
   filter: brightness(1.08);
 }
 
@@ -277,25 +253,16 @@ button:active {
   line-height: 1.5;
 }
 
-/* =====================================================
-   APP SHELL
-===================================================== */
+/* APP SHELL */
 
 .app-shell {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
-  background:
-    radial-gradient(
-      ellipse at 45% 0%,
-      #1b1c3b 0%,
-      #090d18 58%
-    );
+  grid-template-columns: 220px minmax(0,1fr);
+  background: radial-gradient(ellipse at 45% 0%, #1b1c3b 0%, #090d18 58%);
 }
 
-/* =====================================================
-   SIDEBAR
-===================================================== */
+/* SIDEBAR */
 
 .sidebar {
   min-height: 100vh;
@@ -321,15 +288,13 @@ button:active {
   border-radius: 12px;
   color: #241a39;
   font-size: 19px;
-  background: linear-gradient(
-    135deg,
-    #efb4d8,
-    #bcaaff
-  );
+  background: linear-gradient(135deg, #efb4d8, #bcaaff);
 }
 
 .sidebar-logo strong,
-.sidebar-logo span {
+.sidebar-logo span,
+.mini-profile strong,
+.mini-profile span {
   display: block;
 }
 
@@ -361,18 +326,13 @@ button:active {
   background: transparent;
   text-align: left;
   font-size: 13px;
-  transition: .2s ease;
+  transition: background .2s ease, color .2s ease;
 }
 
 .nav-item:hover,
 .nav-item.active {
   color: #fff;
-  background:
-    linear-gradient(
-      100deg,
-      rgba(170,142,255,.2),
-      rgba(239,155,200,.08)
-    );
+  background: linear-gradient(100deg, rgba(170,142,255,.2), rgba(239,155,200,.08));
 }
 
 .nav-item.active {
@@ -381,6 +341,7 @@ button:active {
 
 .nav-item.active svg {
   color: #d0b7ff;
+  flex-shrink: 0;
 }
 
 .sidebar-bottom {
@@ -403,17 +364,8 @@ button:active {
   flex-shrink: 0;
   border-radius: 13px;
   color: #eadfff;
-  background: linear-gradient(
-    135deg,
-    #49386f,
-    #282142
-  );
+  background: linear-gradient(135deg, #49386f, #282142);
   font-weight: 800;
-}
-
-.mini-profile strong,
-.mini-profile span {
-  display: block;
 }
 
 .mini-profile strong {
@@ -445,9 +397,7 @@ button:active {
   background: #ffffff08;
 }
 
-/* =====================================================
-   MAIN
-===================================================== */
+/* MAIN / TOP BAR */
 
 .main-content {
   min-width: 0;
@@ -459,12 +409,17 @@ button:active {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   border-bottom: 1px solid var(--line);
 }
 
-.topbar-left {
+.topbar-left,
+.topbar-right {
   display: flex;
   align-items: center;
+}
+
+.topbar-left {
   gap: 8px;
   color: #8892af;
   font-size: 9px;
@@ -475,14 +430,13 @@ button:active {
 .live-dot {
   width: 7px;
   height: 7px;
+  flex-shrink: 0;
   border-radius: 50%;
   background: var(--green);
   box-shadow: 0 0 12px rgba(109,229,173,.7);
 }
 
 .topbar-right {
-  display: flex;
-  align-items: center;
   gap: 9px;
 }
 
@@ -507,9 +461,7 @@ button:active {
   background: #ffffff07;
 }
 
-/* =====================================================
-   PAGE HEADINGS
-===================================================== */
+/* HEADINGS */
 
 .eyebrow {
   display: flex;
@@ -531,7 +483,7 @@ button:active {
 
 .page-heading h1 {
   margin: 10px 0 8px;
-  font: 800 clamp(28px, 4vw, 42px) Manrope, sans-serif;
+  font: 800 clamp(28px,4vw,42px) Manrope, sans-serif;
   letter-spacing: -1.8px;
 }
 
@@ -539,6 +491,7 @@ button:active {
   margin: 0;
   color: var(--muted);
   font-size: 12px;
+  line-height: 1.6;
 }
 
 .avatar-online {
@@ -550,6 +503,7 @@ button:active {
   border-radius: 20px;
   color: #a9b1c9;
   font-size: 10px;
+  white-space: nowrap;
 }
 
 .avatar-online span {
@@ -560,9 +514,7 @@ button:active {
   box-shadow: 0 0 9px rgba(109,229,173,.65);
 }
 
-/* =====================================================
-   WORLD
-===================================================== */
+/* WORLD HERO */
 
 .world-page {
   padding-bottom: 30px;
@@ -571,19 +523,12 @@ button:active {
 .hero {
   min-height: 420px;
   display: grid;
-  grid-template-columns: 42% 58%;
+  grid-template-columns: minmax(0,42%) minmax(0,58%);
   overflow: hidden;
   position: relative;
   border: 1px solid #b5a0ff25;
   border-radius: 25px;
-  background:
-    radial-gradient(
-      ellipse at 78% 40%,
-      #4b3d7a 0%,
-      #242748 27%,
-      #141b31 58%,
-      #10182b 100%
-    );
+  background: radial-gradient(ellipse at 78% 40%, #4b3d7a 0%, #242748 27%, #141b31 58%, #10182b 100%);
 }
 
 .hero::after {
@@ -591,13 +536,7 @@ button:active {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background:
-    linear-gradient(
-      90deg,
-      #11182a 0%,
-      #11182ae8 32%,
-      transparent 75%
-    );
+  background: linear-gradient(90deg, #11182a 0%, #11182ae8 32%, transparent 75%);
 }
 
 .hero > div:first-child {
@@ -609,7 +548,7 @@ button:active {
 
 .hero h1 {
   margin: 13px 0 10px;
-  font: 800 clamp(29px, 4vw, 46px) Manrope, sans-serif;
+  font: 800 clamp(29px,4vw,46px) Manrope, sans-serif;
   letter-spacing: -2px;
 }
 
@@ -630,11 +569,7 @@ button:active {
   border: 0;
   border-radius: 10px;
   color: #20182c;
-  background: linear-gradient(
-    100deg,
-    #efb4d8,
-    #c5b5ff
-  );
+  background: linear-gradient(100deg, #efb4d8, #c5b5ff);
   font-size: 11px;
   font-weight: 800;
   box-shadow: 0 8px 25px rgba(200,165,255,.2);
@@ -642,6 +577,7 @@ button:active {
 
 .hero-avatar {
   min-width: 0;
+  min-height: 300px;
   position: relative;
   z-index: 2;
 }
@@ -653,10 +589,11 @@ button:active {
   height: 260px;
   left: 50%;
   top: 48%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%,-50%);
   border-radius: 50%;
   background: rgba(190,164,255,.18);
   filter: blur(60px);
+  pointer-events: none;
 }
 
 .section-title {
@@ -668,29 +605,21 @@ button:active {
   font: 800 21px Manrope, sans-serif;
 }
 
-/* =====================================================
-   PEOPLE
-===================================================== */
+/* PEOPLE CARDS */
 
 .people-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0,1fr));
+  grid-template-columns: repeat(3,minmax(0,1fr));
   gap: 14px;
 }
 
 .person-card {
+  min-width: 0;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 17px;
-  background:
-    linear-gradient(
-      150deg,
-      #171c31,
-      #111625
-    );
-  transition:
-    transform .2s ease,
-    border-color .2s ease;
+  background: linear-gradient(150deg, #171c31, #111625);
+  transition: transform .2s ease, border-color .2s ease;
 }
 
 .person-card:hover {
@@ -702,12 +631,7 @@ button:active {
   height: 260px;
   overflow: hidden;
   position: relative;
-  background:
-    radial-gradient(
-      ellipse at center,
-      #353362,
-      #151a2c
-    );
+  background: radial-gradient(ellipse at center, #353362, #151a2c);
 }
 
 .person-avatar canvas {
@@ -799,9 +723,7 @@ button:active {
   background: #9b81e72b;
 }
 
-/* =====================================================
-   3D AVATAR PAGE
-===================================================== */
+/* 3D AVATAR PAGE */
 
 .avatar-page {
   padding-bottom: 30px;
@@ -809,7 +731,7 @@ button:active {
 
 .avatar-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(320px, .7fr);
+  grid-template-columns: minmax(0,1.4fr) minmax(320px,.7fr);
   gap: 18px;
   align-items: stretch;
 }
@@ -821,17 +743,8 @@ button:active {
   position: relative;
   border: 1px solid #b5a0ff2e;
   border-radius: 25px;
-  background:
-    radial-gradient(
-      circle at 50% 38%,
-      #383467 0%,
-      #252745 26%,
-      #141a2c 62%,
-      #0e1424 100%
-    );
-  box-shadow:
-    inset 0 1px rgba(255,255,255,.04),
-    0 25px 80px rgba(0,0,0,.18);
+  background: radial-gradient(circle at 50% 38%, #383467 0%, #252745 26%, #141a2c 62%, #0e1424 100%);
+  box-shadow: inset 0 1px rgba(255,255,255,.04), 0 25px 80px rgba(0,0,0,.18);
 }
 
 .avatar-stage::before {
@@ -839,12 +752,7 @@ button:active {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background:
-    radial-gradient(
-      circle at 50% 42%,
-      rgba(202,175,255,.18),
-      transparent 34%
-    );
+  background: radial-gradient(circle at 50% 42%, rgba(202,175,255,.18), transparent 34%);
 }
 
 .stage-top {
@@ -856,10 +764,12 @@ button:active {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
   color: #d8d4ec;
   font-size: 9px;
   font-weight: 800;
   letter-spacing: 1.4px;
+  pointer-events: none;
 }
 
 .drag-hint {
@@ -880,6 +790,7 @@ button:active {
 
 .avatar-canvas canvas {
   display: block !important;
+  touch-action: pan-y;
 }
 
 .avatar-stage-bottom {
@@ -917,9 +828,7 @@ button:active {
   white-space: nowrap;
 }
 
-/* =====================================================
-   AVATAR EDITOR
-===================================================== */
+/* AVATAR EDITOR */
 
 .avatar-editor {
   min-width: 0;
@@ -927,14 +836,8 @@ button:active {
   padding: 24px;
   border: 1px solid var(--line);
   border-radius: 25px;
-  background:
-    linear-gradient(
-      150deg,
-      rgba(23,28,49,.96),
-      rgba(13,18,32,.96)
-    );
-  box-shadow:
-    inset 0 1px rgba(255,255,255,.03);
+  background: linear-gradient(150deg, rgba(23,28,49,.96), rgba(13,18,32,.96));
+  box-shadow: inset 0 1px rgba(255,255,255,.03);
 }
 
 .editor-header {
@@ -951,6 +854,7 @@ button:active {
   height: 42px;
   display: grid;
   place-items: center;
+  flex-shrink: 0;
   border-radius: 13px;
   color: #d6c7ff;
   background: #a78bfa14;
@@ -968,41 +872,9 @@ button:active {
   font-size: 10px;
 }
 
-.avatar-editor form {
-  display: flex;
-  flex-direction: column;
-}
-
-.avatar-editor label {
-  margin: 0 0 7px;
-  color: #c6cadc;
-  font-size: 10px;
-  font-weight: 700;
-}
-
-.avatar-editor input,
 .avatar-editor textarea {
-  width: 100%;
-  margin-bottom: 17px;
-  padding: 12px 13px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  outline: none;
   resize: vertical;
-  color: white;
-  background: #ffffff05;
-  font-size: 11px;
-}
-
-.avatar-editor input:focus,
-.avatar-editor textarea:focus {
-  border-color: #bcaaff55;
-  background: #ffffff08;
-}
-
-.avatar-editor input::placeholder,
-.avatar-editor textarea::placeholder {
-  color: #68718c;
+  min-height: 90px;
 }
 
 .username-input {
@@ -1025,6 +897,7 @@ button:active {
 }
 
 .username-input input {
+  min-width: 0;
   margin: 0;
   border: 0;
   background: transparent;
@@ -1044,7 +917,7 @@ button:active {
   color: #aab1c9;
   background: #ffffff04;
   font-size: 9px;
-  transition: .18s ease;
+  transition: background .18s ease, color .18s ease;
 }
 
 .interest:hover {
@@ -1055,36 +928,11 @@ button:active {
 .interest.active {
   border-color: #bcaaff55;
   color: #f1eaff;
-  background:
-    linear-gradient(
-      100deg,
-      #a78bfa25,
-      #ef9bc817
-    );
+  background: linear-gradient(100deg, #a78bfa25, #ef9bc817);
 }
 
 .save-button {
   width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 13px;
-  border: 0;
-  border-radius: 11px;
-  color: #21182c;
-  background: linear-gradient(
-    100deg,
-    #efb4d8,
-    #c5b5ff
-  );
-  font-size: 11px;
-  font-weight: 800;
-  box-shadow: 0 10px 30px rgba(200,165,255,.16);
-}
-
-.save-button:hover {
-  filter: brightness(1.07);
 }
 
 .save-button:disabled {
@@ -1103,11 +951,10 @@ button:active {
   background: #6de5ad0c;
   border: 1px solid #6de5ad1d;
   font-size: 9px;
+  line-height: 1.5;
 }
 
-/* =====================================================
-   COMING SOON
-===================================================== */
+/* COMING SOON */
 
 .coming-page {
   min-height: calc(100vh - 76px);
@@ -1115,8 +962,8 @@ button:active {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  text-align: center;
   padding: 30px;
+  text-align: center;
 }
 
 .coming-icon {
@@ -1145,9 +992,7 @@ button:active {
   line-height: 1.7;
 }
 
-/* =====================================================
-   RESPONSIVE
-===================================================== */
+/* RESPONSIVE */
 
 @media (min-width: 1450px) {
   .main-content {
@@ -1160,9 +1005,9 @@ button:active {
   }
 }
 
-@media (max-width: 1050px) {
+@media (max-width: 1200px) {
   .avatar-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0,1fr);
   }
 
   .avatar-stage {
@@ -1174,7 +1019,7 @@ button:active {
   }
 
   .people-grid {
-    grid-template-columns: repeat(2, minmax(0,1fr));
+    grid-template-columns: repeat(2,minmax(0,1fr));
   }
 }
 
@@ -1196,7 +1041,7 @@ button:active {
 
   .sidebar nav {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(5,minmax(0,1fr));
   }
 
   .nav-item {
@@ -1230,7 +1075,7 @@ button:active {
 
   .hero {
     min-height: 600px;
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0,1fr);
   }
 
   .hero > div:first-child {
@@ -1239,10 +1084,11 @@ button:active {
 
   .hero-avatar {
     height: 330px;
+    min-height: 330px;
   }
 
   .people-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2,minmax(0,1fr));
   }
 
   .avatar-stage {
@@ -1251,8 +1097,13 @@ button:active {
 }
 
 @media (max-width: 560px) {
+  .auth-card {
+    padding: 28px 22px;
+  }
+
   .topbar-left {
     font-size: 8px;
+    letter-spacing: .8px;
   }
 
   .early-access {
@@ -1278,7 +1129,7 @@ button:active {
   }
 
   .people-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0,1fr);
   }
 
   .person-avatar {
@@ -1305,6 +1156,11 @@ button:active {
 }
 
 @media (max-width: 390px) {
+  .sidebar {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
   .sidebar nav {
     gap: 2px;
   }
@@ -1321,5 +1177,19 @@ button:active {
   .hero {
     min-height: 560px;
   }
+
+  .hero > div:first-child {
+    padding: 22px;
+  }
 }
-```
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

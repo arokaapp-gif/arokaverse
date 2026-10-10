@@ -1,5 +1,5 @@
-
-import { useState, useEffect } from "react";
+```jsx
+import { useState, useEffect, useRef } from "react";
 import {
   Heart,
   MessageCircle,
@@ -16,40 +16,50 @@ import {
   MapPin,
   Save,
   ArrowLeft,
-  CheckCircle2
+  CheckCircle2,
+  LogOut,
+  Camera
 } from "lucide-react";
+
+import { Canvas, useFrame } from "@react-three/fiber";
+import {
+  OrbitControls,
+  Environment,
+  ContactShadows
+} from "@react-three/drei";
+
 import { supabase } from "./lib/supabase.js";
 
+/* -------------------------------------------------------
+   DEMO PEOPLE
+------------------------------------------------------- */
+
 const people = [
-  { name: "Mira", age: 24, vibe: "Music & sunsets", color: "#ed9bc8", emoji: "🌸" },
-  { name: "Aarav", age: 26, vibe: "Travel & gaming", color: "#81c9df", emoji: "🌊" },
-  { name: "Anaya", age: 23, vibe: "Art & coffee", color: "#f4c17a", emoji: "🌻" }
+  {
+    id: 1,
+    name: "Mira",
+    age: 24,
+    city: "Bhubaneswar",
+    bio: "Love music, travel and late-night conversations.",
+    interests: ["Music", "Travel", "Coffee"]
+  },
+  {
+    id: 2,
+    name: "Aarav",
+    age: 26,
+    city: "Berhampur",
+    bio: "Gaming, technology and exploring new places.",
+    interests: ["Gaming", "Technology", "Travel"]
+  },
+  {
+    id: 3,
+    name: "Anaya",
+    age: 23,
+    city: "Puri",
+    bio: "Art, photography and peaceful beach walks.",
+    interests: ["Art", "Photography", "Nature"]
+  }
 ];
-
-const authInputStyle = {
-  display: "block",
-  width: "100%",
-  boxSizing: "border-box",
-  padding: "13px 14px",
-  margin: "8px 0 18px",
-  borderRadius: "10px",
-  border: "1px solid #655675",
-  background: "#191629",
-  color: "#ffffff",
-  fontSize: "15px"
-};
-
-const authButtonStyle = {
-  width: "100%",
-  padding: "14px",
-  border: 0,
-  borderRadius: "10px",
-  background: "#d7a7ff",
-  color: "#21142f",
-  fontWeight: 700,
-  fontSize: "15px",
-  cursor: "pointer"
-};
 
 const interestOptions = [
   "Music",
@@ -66,746 +76,969 @@ const interestOptions = [
   "Photography"
 ];
 
+/* -------------------------------------------------------
+   3D AVATAR
+------------------------------------------------------- */
+
+function AvatarModel({ avatarName = "Explorer" }) {
+  const group = useRef();
+
+  useFrame((state) => {
+    if (!group.current) return;
+
+    group.current.rotation.y =
+      Math.sin(state.clock.elapsedTime * 0.45) * 0.12;
+
+    group.current.position.y =
+      Math.sin(state.clock.elapsedTime * 1.4) * 0.035;
+  });
+
+  return (
+    <group ref={group} position={[0, -1.25, 0]}>
+      {/* BODY */}
+      <mesh position={[0, 0.25, 0]} castShadow>
+        <capsuleGeometry args={[0.48, 0.9, 8, 20]} />
+        <meshStandardMaterial color="#6366f1" roughness={0.65} />
+      </mesh>
+
+      {/* NECK */}
+      <mesh position={[0, 1.0, 0]} castShadow>
+        <cylinderGeometry args={[0.16, 0.18, 0.28, 24]} />
+        <meshStandardMaterial color="#f1b08a" />
+      </mesh>
+
+      {/* HEAD */}
+      <mesh position={[0, 1.55, 0]} castShadow>
+        <sphereGeometry args={[0.48, 32, 32]} />
+        <meshStandardMaterial
+          color="#f1b08a"
+          roughness={0.75}
+        />
+      </mesh>
+
+      {/* HAIR */}
+      <mesh position={[0, 1.82, -0.02]} castShadow>
+        <sphereGeometry args={[0.49, 32, 20]} />
+        <meshStandardMaterial
+          color="#211815"
+          roughness={0.9}
+        />
+      </mesh>
+
+      {/* FACE FRONT COVER */}
+      <mesh position={[0, 1.57, 0.43]}>
+        <sphereGeometry args={[0.40, 32, 20]} />
+        <meshStandardMaterial color="#f1b08a" />
+      </mesh>
+
+      {/* LEFT EYE */}
+      <mesh position={[-0.17, 1.63, 0.76]}>
+        <sphereGeometry args={[0.055, 20, 20]} />
+        <meshStandardMaterial color="#111827" />
+      </mesh>
+
+      {/* RIGHT EYE */}
+      <mesh position={[0.17, 1.63, 0.76]}>
+        <sphereGeometry args={[0.055, 20, 20]} />
+        <meshStandardMaterial color="#111827" />
+      </mesh>
+
+      {/* LEFT EYEBROW */}
+      <mesh
+        position={[-0.17, 1.75, 0.755]}
+        rotation={[0, 0, -0.08]}
+      >
+        <boxGeometry args={[0.16, 0.025, 0.025]} />
+        <meshStandardMaterial color="#211815" />
+      </mesh>
+
+      {/* RIGHT EYEBROW */}
+      <mesh
+        position={[0.17, 1.75, 0.755]}
+        rotation={[0, 0, 0.08]}
+      >
+        <boxGeometry args={[0.16, 0.025, 0.025]} />
+        <meshStandardMaterial color="#211815" />
+      </mesh>
+
+      {/* NOSE */}
+      <mesh position={[0, 1.50, 0.78]}>
+        <coneGeometry args={[0.055, 0.18, 12]} />
+        <meshStandardMaterial color="#d9906c" />
+      </mesh>
+
+      {/* MOUTH */}
+      <mesh position={[0, 1.39, 0.77]}>
+        <boxGeometry args={[0.18, 0.035, 0.025]} />
+        <meshStandardMaterial color="#9b4b4b" />
+      </mesh>
+
+      {/* LEFT ARM */}
+      <mesh
+        position={[-0.58, 0.35, 0]}
+        rotation={[0, 0, -0.18]}
+        castShadow
+      >
+        <capsuleGeometry args={[0.13, 0.65, 8, 16]} />
+        <meshStandardMaterial color="#6366f1" />
+      </mesh>
+
+      {/* RIGHT ARM */}
+      <mesh
+        position={[0.58, 0.35, 0]}
+        rotation={[0, 0, 0.18]}
+        castShadow
+      >
+        <capsuleGeometry args={[0.13, 0.65, 8, 16]} />
+        <meshStandardMaterial color="#6366f1" />
+      </mesh>
+
+      {/* LEFT HAND */}
+      <mesh position={[-0.68, -0.08, 0]} castShadow>
+        <sphereGeometry args={[0.14, 20, 20]} />
+        <meshStandardMaterial color="#f1b08a" />
+      </mesh>
+
+      {/* RIGHT HAND */}
+      <mesh position={[0.68, -0.08, 0]} castShadow>
+        <sphereGeometry args={[0.14, 20, 20]} />
+        <meshStandardMaterial color="#f1b08a" />
+      </mesh>
+
+      {/* LEFT LEG */}
+      <mesh position={[-0.20, -0.65, 0]} castShadow>
+        <capsuleGeometry args={[0.17, 0.70, 8, 16]} />
+        <meshStandardMaterial color="#242938" />
+      </mesh>
+
+      {/* RIGHT LEG */}
+      <mesh position={[0.20, -0.65, 0]} castShadow>
+        <capsuleGeometry args={[0.17, 0.70, 8, 16]} />
+        <meshStandardMaterial color="#242938" />
+      </mesh>
+
+      {/* LEFT SHOE */}
+      <mesh position={[-0.22, -1.10, 0.10]} castShadow>
+        <boxGeometry args={[0.35, 0.16, 0.55]} />
+        <meshStandardMaterial color="#111827" />
+      </mesh>
+
+      {/* RIGHT SHOE */}
+      <mesh position={[0.22, -1.10, 0.10]} castShadow>
+        <boxGeometry args={[0.35, 0.16, 0.55]} />
+        <meshStandardMaterial color="#111827" />
+      </mesh>
+    </group>
+  );
+}
+
+/* -------------------------------------------------------
+   AVATAR SCENE
+------------------------------------------------------- */
+
+function AvatarScene({ name }) {
+  return (
+    <Canvas
+      shadows
+      camera={{
+        position: [0, 0.8, 4.2],
+        fov: 42
+      }}
+      style={{
+        width: "100%",
+        height: "100%",
+        minHeight: "520px"
+      }}
+    >
+      <ambientLight intensity={1.7} />
+
+      <directionalLight
+        position={[3, 5, 4]}
+        intensity={2.5}
+        castShadow
+      />
+
+      <pointLight
+        position={[-3, 2, 2]}
+        intensity={1.5}
+      />
+
+      <AvatarModel avatarName={name} />
+
+      <ContactShadows
+        position={[0, -2.35, 0]}
+        opacity={0.35}
+        scale={4}
+        blur={2}
+      />
+
+      <Environment preset="city" />
+
+      <OrbitControls
+        enablePan={false}
+        minDistance={3}
+        maxDistance={5}
+        minPolarAngle={Math.PI / 3}
+        maxPolarAngle={Math.PI / 1.7}
+      />
+    </Canvas>
+  );
+}
+
+/* -------------------------------------------------------
+   MAIN APP
+------------------------------------------------------- */
+
 export default function App() {
-  const [active, setActive] = useState("World");
-  const [selected, setSelected] = useState(people[0]);
-  const [liked, setLiked] = useState([]);
-  const [messages, setMessages] = useState([]);
-  const [draft, setDraft] = useState("");
-  const [notice, setNotice] = useState("");
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(null);
-  const [authLoading, setAuthLoading] = useState(true);
-  const [profileLoading, setProfileLoading] = useState(false);
-  const [authMode, setAuthMode] = useState("login");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [authMessage, setAuthMessage] = useState("");
-  const [authBusy, setAuthBusy] = useState(false);
+  const [activePage, setActivePage] = useState("World");
 
-  const [displayName, setDisplayName] = useState("");
+  const [displayName, setDisplayName] = useState("Explorer");
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
   const [interests, setInterests] = useState([]);
 
-  useEffect(() => {
-    if (!supabase) {
-      setAuthLoading(false);
-      setAuthMessage("Supabase configuration is missing. Check Railway variables.");
-      return;
-    }
+  const [saving, setSaving] = useState(false);
+  const [profileMessage, setProfileMessage] = useState("");
 
+  const [loginMode, setLoginMode] = useState("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [authMessage, setAuthMessage] = useState("");
+
+  const [liked, setLiked] = useState({});
+  const [messageText, setMessageText] = useState("");
+
+  /* ---------------------------------------------
+     AUTH
+  --------------------------------------------- */
+
+  useEffect(() => {
     let mounted = true;
 
     async function loadSession() {
-      const { data, error } = await supabase.auth.getSession();
+      if (!supabase) {
+        setLoading(false);
+        return;
+      }
 
-      if (!mounted) return;
+      const {
+        data: { session }
+      } = await supabase.auth.getSession();
 
-      if (error) setAuthMessage(error.message);
-      setUser(data?.session?.user ?? null);
-      setAuthLoading(false);
+      if (mounted) {
+        setSession(session);
+        setLoading(false);
+      }
     }
 
     loadSession();
 
-    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!mounted) return;
-      setUser(session?.user ?? null);
-      setAuthLoading(false);
-    });
+    const {
+      data: { subscription }
+    } = supabase
+      ? supabase.auth.onAuthStateChange((_event, nextSession) => {
+          setSession(nextSession);
+        })
+      : { data: { subscription: null } };
 
     return () => {
       mounted = false;
-      data.subscription.unsubscribe();
+      subscription?.unsubscribe();
     };
   }, []);
 
+  /* ---------------------------------------------
+     LOAD PROFILE
+  --------------------------------------------- */
+
   useEffect(() => {
-    if (!user || !supabase) {
-      setProfile(null);
-      setDisplayName("");
-      setUsername("");
-      setBio("");
-      setInterests([]);
-      return;
-    }
+    async function loadProfile() {
+      if (!session?.user || !supabase) return;
 
-    let cancelled = false;
+      const userId = session.user.id;
 
-    async function loadOrCreateProfile() {
-      setProfileLoading(true);
-      setAuthMessage("");
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .maybeSingle();
 
-      try {
-        const { data: existing, error: fetchError } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", user.id)
-          .maybeSingle();
+      if (error) {
+        console.error("Profile load error:", error);
+        return;
+      }
 
-        if (fetchError) throw fetchError;
-
-        let loadedProfile = existing;
-
-        if (!loadedProfile) {
-          const metadataName =
-            user.user_metadata?.display_name ||
-            user.user_metadata?.full_name ||
-            user.email?.split("@")[0] ||
-            "New Explorer";
-
-          const proposedName = metadataName.trim().slice(0, 40) || "New Explorer";
-
-          const { data: created, error: insertError } = await supabase
-            .from("profiles")
-            .insert({
-              id: user.id,
-              display_name: proposedName
-            })
-            .select()
-            .single();
-
-          if (insertError) throw insertError;
-          loadedProfile = created;
-        }
-
-        if (!cancelled) {
-          setProfile(loadedProfile);
-          setDisplayName(loadedProfile.display_name || "");
-          setUsername(loadedProfile.username || "");
-          setBio(loadedProfile.bio || "");
-          setInterests(
-            Array.isArray(loadedProfile.interests) ? loadedProfile.interests : []
-          );
-        }
-      } catch (error) {
-        if (!cancelled) {
-          setAuthMessage(
-            `Profile could not be loaded: ${error.message}. Please refresh and try again.`
-          );
-        }
-      } finally {
-        if (!cancelled) setProfileLoading(false);
+      if (data) {
+        setDisplayName(data.display_name || "Explorer");
+        setUsername(data.username || "");
+        setBio(data.bio || "");
+        setInterests(data.interests || []);
+      } else {
+        await supabase.from("profiles").insert({
+          id: userId,
+          display_name:
+            session.user.user_metadata?.full_name ||
+            "Explorer",
+          bio: "",
+          interests: []
+        });
       }
     }
 
-    loadOrCreateProfile();
+    loadProfile();
+  }, [session]);
 
-    return () => {
-      cancelled = true;
-    };
-  }, [user]);
-
-  function notify(text) {
-    setNotice(text);
-    window.setTimeout(() => setNotice(""), 3000);
-  }
+  /* ---------------------------------------------
+     AUTH ACTIONS
+  --------------------------------------------- */
 
   async function handleAuth(e) {
     e.preventDefault();
     setAuthMessage("");
 
     if (!supabase) {
-      setAuthMessage("Supabase is not configured. Check Railway variables.");
+      setAuthMessage("Supabase is not configured.");
       return;
     }
 
-    const cleanEmail = email.trim();
-
-    if (!cleanEmail) {
-      setAuthMessage("Please enter your email address.");
+    if (!email || !password) {
+      setAuthMessage("Email and password required.");
       return;
     }
 
-    if (password.length < 6) {
-      setAuthMessage("Password must be at least 6 characters long.");
-      return;
-    }
-
-    setAuthBusy(true);
-
-    try {
-      if (authMode === "signup") {
-        const { data, error } = await supabase.auth.signUp({
-          email: cleanEmail,
-          password,
-          options: {
-            emailRedirectTo: window.location.origin,
-            data: {
-              display_name: displayName.trim() || cleanEmail.split("@")[0]
-            }
+    if (loginMode === "signup") {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: "Explorer"
           }
-        });
-
-        if (error) throw error;
-
-        if (data.session) {
-          setAuthMessage("Account created. Setting up your profile...");
-        } else {
-          setAuthMessage(
-            "Signup submitted. Check your email and click the verification link, then log in."
-          );
         }
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email: cleanEmail,
-          password
-        });
+      });
 
-        if (error) throw error;
+      if (error) {
+        setAuthMessage(error.message);
+        return;
       }
-    } catch (error) {
-      setAuthMessage(error.message || "Authentication failed. Please try again.");
-    } finally {
-      setAuthBusy(false);
-    }
-  }
 
-  async function saveProfile(e) {
-    e.preventDefault();
-
-    if (!supabase || !user) return;
-
-    const cleanName = displayName.trim();
-
-    if (!cleanName) {
-      setAuthMessage("Please enter your display name.");
+      setAuthMessage(
+        "Account created. Please verify your email."
+      );
+      setLoginMode("login");
       return;
     }
 
-    setProfileLoading(true);
-    setAuthMessage("");
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
 
-    try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .update({
-          display_name: cleanName.slice(0, 40),
-          updated_at: new Date().toISOString()
-        })
-        .eq("id", user.id)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      setProfile(data);
-      setDisplayName(data.display_name || "");
-      notify("Display name saved!");
-    } catch (error) {
-      setAuthMessage(`Could not save profile: ${error.message}`);
-    } finally {
-      setProfileLoading(false);
+    if (error) {
+      setAuthMessage(error.message);
+      return;
     }
   }
+
+  async function handleLogout() {
+    await supabase?.auth.signOut();
+  }
+
+  /* ---------------------------------------------
+     PROFILE SAVE
+  --------------------------------------------- */
 
   async function saveAvatar(e) {
     e.preventDefault();
 
-    if (!supabase || !user) return;
+    if (!session?.user || !supabase) return;
 
-    const cleanName = displayName.trim();
+    setSaving(true);
+    setProfileMessage("");
+
     const cleanUsername = username.trim().toLowerCase();
-    const cleanBio = bio.trim().slice(0, 250);
 
-    if (!cleanName) {
-      setAuthMessage("Please enter your display name.");
-      return;
-    }
-
-    if (!/^[a-z0-9_]{3,20}$/.test(cleanUsername)) {
-      setAuthMessage(
-        "Username must be 3–20 characters: use lowercase letters, numbers or underscores only."
+    if (
+      cleanUsername &&
+      !/^[a-z0-9_]{3,20}$/.test(cleanUsername)
+    ) {
+      setProfileMessage(
+        "Username 3-20 characters ka ho: a-z, 0-9 aur _ only."
       );
+      setSaving(false);
       return;
     }
 
-    const cleanInterests = [...new Set(interests)].slice(0, 12);
-
-    setProfileLoading(true);
-    setAuthMessage("");
-    setNotice("");
-
-    try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .update({
-          display_name: cleanName.slice(0, 40),
-          username: cleanUsername,
-          bio: cleanBio,
-          interests: cleanInterests,
-          updated_at: new Date().toISOString()
-        })
-        .eq("id", user.id)
-        .select()
-        .single();
-
-      if (error) {
-        if (error.code === "23505") {
-          throw new Error("This username is already taken. Please choose another.");
-        }
-        throw error;
-      }
-
-      setProfile(data);
-      setDisplayName(data.display_name || "");
-      setUsername(data.username || "");
-      setBio(data.bio || "");
-      setInterests(Array.isArray(data.interests) ? data.interests : []);
-      notify("Your avatar profile has been saved!");
-    } catch (error) {
-      setAuthMessage(`Could not save avatar: ${error.message}`);
-    } finally {
-      setProfileLoading(false);
-    }
-  }
-
-  function toggleInterest(interest) {
-    setInterests((current) =>
-      current.includes(interest)
-        ? current.filter((item) => item !== interest)
-        : current.length < 12
-          ? [...current, interest]
-          : current
-    );
-  }
-
-  async function handleLogout() {
-    if (!supabase) return;
-
-    const { error } = await supabase.auth.signOut();
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        display_name: displayName.trim() || "Explorer",
+        username: cleanUsername || null,
+        bio: bio.trim(),
+        interests,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", session.user.id);
 
     if (error) {
-      notify(error.message || "Could not log out.");
+      if (error.code === "23505") {
+        setProfileMessage("Ye username already taken hai.");
+      } else {
+        setProfileMessage(error.message);
+      }
+
+      setSaving(false);
       return;
     }
 
-    setMessages([]);
-    setDraft("");
-    setAuthMessage("");
-    setPassword("");
-    setAuthMode("login");
-    setActive("World");
-    notify("You have logged out.");
+    setProfileMessage("Avatar profile saved successfully.");
+    setSaving(false);
   }
 
-  function sendMessage(e) {
-    e.preventDefault();
-    if (!draft.trim()) return;
-    setMessages((old) => [...old, { text: draft.trim() }]);
-    setDraft("");
-    notify("Demo message added. Real chat is not connected yet.");
-  }
-
-  if (authLoading) {
-    return (
-      <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", background: "#101020", color: "white", fontFamily: "sans-serif" }}>
-        <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: "32px", marginBottom: "12px" }}>✨</div>
-          <p>Entering your universe...</p>
-        </div>
-      </main>
+  function toggleInterest(item) {
+    setInterests((current) =>
+      current.includes(item)
+        ? current.filter((x) => x !== item)
+        : [...current, item]
     );
   }
 
-  if (!user) {
+  function toggleLike(id) {
+    setLiked((current) => ({
+      ...current,
+      [id]: !current[id]
+    }));
+  }
+
+  /* ---------------------------------------------
+     LOADING
+  --------------------------------------------- */
+
+  if (loading) {
     return (
-      <main style={{ minHeight: "100vh", boxSizing: "border-box", display: "grid", placeItems: "center", padding: "24px", background: "radial-gradient(circle at top, #41305c 0%, #19162e 45%, #101020 100%)", color: "white", fontFamily: "sans-serif" }}>
-        <form onSubmit={handleAuth} style={{ width: "100%", maxWidth: "410px", boxSizing: "border-box", padding: "clamp(22px, 5vw, 34px)", borderRadius: "22px", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.15)", boxShadow: "0 24px 80px rgba(0,0,0,0.28)" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", letterSpacing: "2px", fontSize: "14px", fontWeight: 700 }}>
-            <Sparkles size={22} color="#d7a7ff" /> AROKAVERSE
-          </div>
+      <div className="loading-screen">
+        <div className="loading-orb">
+          ✦
+        </div>
+        <h2>Entering ArokaVerse...</h2>
+        <p>Preparing your virtual world</p>
+      </div>
+    );
+  }
 
-          <h1 style={{ fontSize: "clamp(27px, 6vw, 35px)", lineHeight: 1.2, margin: "28px 0 10px" }}>
-            {authMode === "signup" ? "Join your universe." : "Welcome back."}
-          </h1>
+  /* ---------------------------------------------
+     LOGIN SCREEN
+  --------------------------------------------- */
 
-          <p style={{ color: "#d0c7e4", lineHeight: 1.6, marginBottom: "26px" }}>
-            {authMode === "signup"
-              ? "Create your account and start making meaningful connections."
-              : "Sign in to return to your world and discover new connections."}
+  if (!session) {
+    return (
+      <div className="auth-page">
+        <div className="auth-glow glow-one" />
+        <div className="auth-glow glow-two" />
+
+        <div className="auth-card">
+          <div className="brand-mark">✦</div>
+
+          <h1>ArokaVerse</h1>
+
+          <p className="auth-subtitle">
+            Meet people. Create your avatar.
+            <br />
+            Enter a new virtual world.
           </p>
 
-          {authMode === "signup" && (
-            <>
-              <label htmlFor="aroka-name">Display name</label>
-              <input
-                id="aroka-name"
-                type="text"
-                maxLength={40}
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="What should people call you?"
-                style={authInputStyle}
-              />
-            </>
-          )}
+          <form onSubmit={handleAuth}>
+            <label>Email</label>
 
-          <label htmlFor="aroka-email">Email address</label>
-          <input
-            id="aroka-email"
-            type="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            style={authInputStyle}
-          />
+            <input
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
 
-          <label htmlFor="aroka-password">Password</label>
-          <input
-            id="aroka-password"
-            type="password"
-            autoComplete={authMode === "signup" ? "new-password" : "current-password"}
-            minLength={6}
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="At least 6 characters"
-            style={authInputStyle}
-          />
+            <label>Password</label>
 
-          <button type="submit" disabled={authBusy} style={{ ...authButtonStyle, opacity: authBusy ? 0.7 : 1, cursor: authBusy ? "wait" : "pointer" }}>
-            {authBusy ? "Please wait..." : authMode === "signup" ? "Create account" : "Login"}
-          </button>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+
+            <button className="primary-button">
+              {loginMode === "login"
+                ? "Enter ArokaVerse"
+                : "Create Account"}
+            </button>
+          </form>
 
           {authMessage && (
-            <div role="status" style={{ marginTop: "18px", padding: "12px", borderRadius: "10px", background: "rgba(215,167,255,0.1)", border: "1px solid rgba(215,167,255,0.22)", color: "#f0e4ff", fontSize: "14px", lineHeight: 1.6, overflowWrap: "anywhere" }}>
+            <div className="auth-message">
               {authMessage}
             </div>
           )}
 
-          <p style={{ marginTop: "24px", textAlign: "center", color: "#d0c7e4", fontSize: "14px", lineHeight: 1.8 }}>
-            {authMode === "signup" ? "Already have an account?" : "New to ArokaVerse?"}{" "}
-            <button type="button" onClick={() => { setAuthMode(authMode === "signup" ? "login" : "signup"); setAuthMessage(""); }} style={{ border: 0, padding: 0, background: "transparent", color: "#e0baff", cursor: "pointer", fontWeight: 700, fontSize: "14px" }}>
-              {authMode === "signup" ? "Login" : "Sign up"}
-            </button>
-          </p>
-
-          <p style={{ textAlign: "center", color: "#a9a0bd", fontSize: "12px", lineHeight: 1.6, marginBottom: 0 }}>
-            Use an email address you can access. Never share your password with anyone.
-          </p>
-        </form>
-      </main>
+          <button
+            className="text-button"
+            onClick={() =>
+              setLoginMode(
+                loginMode === "login"
+                  ? "signup"
+                  : "login"
+              )
+            }
+          >
+            {loginMode === "login"
+              ? "New here? Create an account"
+              : "Already have an account? Login"}
+          </button>
+        </div>
+      </div>
     );
   }
 
-  return (
-    <main className="app-shell">
-      <aside className="sidebar">
-        <div className="brand-mark">
-          <Sparkles size={22} />
-          <span>aroka<span className="brand-light">verse</span></span>
+  /* ---------------------------------------------
+     MY AVATAR PAGE
+  --------------------------------------------- */
+
+  function AvatarPage() {
+    return (
+      <div className="avatar-page">
+        <div className="page-heading">
+          <div>
+            <span className="eyebrow">
+              YOUR VIRTUAL IDENTITY
+            </span>
+
+            <h1>My Avatar</h1>
+
+            <p>
+              This is how other people will see you
+              inside ArokaVerse.
+            </p>
+          </div>
+
+          <div className="avatar-online">
+            <span />
+            Online
+          </div>
         </div>
-        <div className="side-caption">YOUR UNIVERSE</div>
 
-        {[
-          { label: "World", icon: Globe },
-          { label: "Discover", icon: Compass },
-          { label: "Matches", icon: Heart },
-          { label: "Messages", icon: MessageCircle },
-          { label: "My Avatar", icon: UserRound }
-        ].map((item) => {
-          const Icon = item.icon;
-          return (
-            <button
-              key={item.label}
-              className={`nav-item ${active === item.label ? "active" : ""}`}
-              onClick={() => {
-                setActive(item.label);
-                setAuthMessage("");
-                if (item.label !== "World" && item.label !== "My Avatar") {
-                  notify(`${item.label} is not connected yet.`);
-                }
-              }}
-            >
-              <Icon size={19} />
-              <span>{item.label}</span>
-            </button>
-          );
-        })}
+        <div className="avatar-layout">
+          {/* 3D VIEW */}
+          <div className="avatar-stage">
+            <div className="stage-top">
+              <span>3D AVATAR</span>
 
-        <div className="sidebar-bottom">
-          <div className="online-status"><span className="green-dot" /> World is peaceful</div>
-          <button className="nav-item" onClick={() => notify("Settings will be added later.")}>
-            <Settings size={19} /> Settings
-          </button>
-          <div className="mini-profile">
-            <div className="mini-avatar">✨</div>
-            <div>
-              <strong>{profile?.display_name || "Your avatar"}</strong>
-              <small>{profileLoading ? "Loading profile..." : username ? `@${username}` : "New explorer"}</small>
+              <span className="drag-hint">
+                Drag to rotate
+              </span>
+            </div>
+
+            <div className="avatar-canvas">
+              <AvatarScene name={displayName} />
+            </div>
+
+            <div className="avatar-stage-bottom">
+              <div>
+                <strong>
+                  {displayName || "Explorer"}
+                </strong>
+
+                {username && (
+                  <span>@{username}</span>
+                )}
+              </div>
+
+              <div className="avatar-badge">
+                ✦ Early Explorer
+              </div>
             </div>
           </div>
-        </div>
-      </aside>
 
-      <section className="main-content">
-        <header className="topbar">
-          <div className="breadcrumb">Explore <span>/</span> <strong>{active}</strong></div>
-          <div className="top-actions">
-            <span className="beta-tag">EARLY ACCESS</span>
-            <button className="icon-button" onClick={() => notify("You're all caught up")} aria-label="Notifications">
-              <Sparkles size={19} />
-            </button>
-            <button className="icon-button" onClick={handleLogout} aria-label="Log out" title="Log out">
-              Log out
-            </button>
-          </div>
-        </header>
-
-        <div style={{ padding: "8px 20px", fontSize: "12px", opacity: 0.8, overflowWrap: "anywhere" }}>
-          Signed in as {user.email}
-        </div>
-
-        {authMessage && (
-          <div role="status" style={{ margin: "10px 20px", padding: "12px", borderRadius: "10px", background: "rgba(215,167,255,0.1)", color: "#f0e4ff", fontSize: "14px", lineHeight: 1.6, overflowWrap: "anywhere" }}>
-            {authMessage}
-          </div>
-        )}
-
-        {active === "My Avatar" ? (
-          <section style={{ margin: "16px 20px 32px", padding: "clamp(18px, 4vw, 30px)", border: "1px solid rgba(215,167,255,0.25)", borderRadius: "20px", background: "rgba(255,255,255,0.04)", color: "#fff" }}>
-            <button
-              type="button"
-              onClick={() => setActive("World")}
-              style={{ display: "inline-flex", alignItems: "center", gap: "8px", border: 0, background: "transparent", color: "#d7a7ff", cursor: "pointer", marginBottom: "14px" }}
-            >
-              <ArrowLeft size={16} /> Back to World
-            </button>
-
-            <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap", marginBottom: "24px" }}>
-              <div style={{ width: "76px", height: "76px", borderRadius: "50%", display: "grid", placeItems: "center", fontSize: "32px", background: "linear-gradient(135deg, #d7a7ff, #7c65c7)", border: "2px solid rgba(255,255,255,0.3)" }}>
-                ✨
+          {/* PROFILE */}
+          <div className="avatar-editor">
+            <div className="editor-header">
+              <div className="editor-icon">
+                <Camera size={20} />
               </div>
+
               <div>
-                <div className="eyebrow"><Sparkles size={14} /> YOUR VIRTUAL IDENTITY</div>
-                <h1 style={{ margin: "8px 0", overflowWrap: "anywhere" }}>My Avatar</h1>
-                <p style={{ margin: 0, color: "#cfc3e6" }}>Create the profile people will see in your universe.</p>
+                <h2>Avatar Profile</h2>
+                <p>Tell the world about you.</p>
               </div>
             </div>
 
             <form onSubmit={saveAvatar}>
-              <label htmlFor="avatar-display-name">Display name</label>
+              <label>Display Name</label>
+
               <input
-                id="avatar-display-name"
-                type="text"
-                required
-                maxLength={40}
                 value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="Your display name"
-                style={authInputStyle}
+                onChange={(e) =>
+                  setDisplayName(e.target.value)
+                }
+                placeholder="Your name"
               />
 
-              <label htmlFor="avatar-username">Username</label>
-              <input
-                id="avatar-username"
-                type="text"
-                required
-                maxLength={20}
-                value={username}
-                onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
-                placeholder="e.g. amit_explorer"
-                style={authInputStyle}
-              />
-              <p style={{ color: "#b8abc9", fontSize: "12px", marginTop: "-10px", marginBottom: "18px" }}>
-                3–20 characters. Lowercase letters, numbers and underscores only. Each username must be unique.
-              </p>
+              <label>Username</label>
 
-              <label htmlFor="avatar-bio">Your bio</label>
+              <div className="username-input">
+                <span>@</span>
+
+                <input
+                  value={username}
+                  onChange={(e) =>
+                    setUsername(e.target.value)
+                  }
+                  placeholder="your_username"
+                />
+              </div>
+
+              <label>Bio</label>
+
               <textarea
-                id="avatar-bio"
                 value={bio}
-                maxLength={250}
-                onChange={(e) => setBio(e.target.value)}
-                placeholder="Tell people a little about yourself..."
+                onChange={(e) =>
+                  setBio(e.target.value)
+                }
+                placeholder="Tell people something about you..."
                 rows={4}
-                style={{ ...authInputStyle, resize: "vertical", fontFamily: "inherit", lineHeight: 1.5 }}
               />
-              <p style={{ color: "#b8abc9", fontSize: "12px", textAlign: "right", marginTop: "-10px", marginBottom: "22px" }}>
-                {bio.length}/250 characters
-              </p>
 
-              <div style={{ marginBottom: "24px" }}>
-                <div style={{ fontWeight: 700, marginBottom: "8px" }}>Your interests</div>
-                <p style={{ color: "#cfc3e6", fontSize: "14px", marginTop: 0 }}>
-                  Choose up to 12 things you enjoy.
-                </p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "9px" }}>
-                  {interestOptions.map((interest) => {
-                    const chosen = interests.includes(interest);
-                    return (
-                      <button
-                        key={interest}
-                        type="button"
-                        aria-pressed={chosen}
-                        onClick={() => toggleInterest(interest)}
-                        style={{
-                          padding: "9px 13px",
-                          borderRadius: "999px",
-                          border: chosen ? "1px solid #d7a7ff" : "1px solid #655675",
-                          background: chosen ? "rgba(215,167,255,0.2)" : "#191629",
-                          color: chosen ? "#f0dcff" : "#d5cce3",
-                          cursor: "pointer",
-                          fontSize: "13px"
-                        }}
-                      >
-                        {chosen ? "✓ " : "+ "}{interest}
-                      </button>
-                    );
-                  })}
-                </div>
-                <p style={{ color: "#b8abc9", fontSize: "12px" }}>{interests.length} selected</p>
+              <label>Interests</label>
+
+              <div className="interest-grid">
+                {interestOptions.map((item) => (
+                  <button
+                    type="button"
+                    key={item}
+                    className={
+                      interests.includes(item)
+                        ? "interest active"
+                        : "interest"
+                    }
+                    onClick={() =>
+                      toggleInterest(item)
+                    }
+                  >
+                    {item}
+                  </button>
+                ))}
               </div>
 
               <button
                 type="submit"
-                disabled={profileLoading}
-                style={{ ...authButtonStyle, display: "flex", alignItems: "center", justifyContent: "center", gap: "9px", opacity: profileLoading ? 0.7 : 1 }}
+                className="save-button"
+                disabled={saving}
               >
-                {profileLoading ? <span>Saving...</span> : <><Save size={17} /> Save Avatar Profile</>}
+                {saving ? (
+                  "Saving..."
+                ) : (
+                  <>
+                    <Save size={18} />
+                    Save Avatar Profile
+                  </>
+                )}
               </button>
+
+              {profileMessage && (
+                <div className="save-message">
+                  <CheckCircle2 size={16} />
+                  {profileMessage}
+                </div>
+              )}
             </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-            {notice && (
-              <div role="status" style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "16px", padding: "12px", borderRadius: "10px", background: "rgba(105,220,160,0.1)", color: "#b8f5d1", overflowWrap: "anywhere" }}>
-                <CheckCircle2 size={18} /> {notice}
-              </div>
-            )}
+  /* ---------------------------------------------
+     WORLD PAGE
+  --------------------------------------------- */
 
-            <div style={{ marginTop: "28px", padding: "18px", borderRadius: "14px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-              <div className="eyebrow"><UserRound size={14} /> PROFILE PREVIEW</div>
-              <h2 style={{ marginBottom: "6px", overflowWrap: "anywhere" }}>{displayName || "Your display name"}</h2>
-              <p style={{ color: "#d7a7ff", marginTop: 0, overflowWrap: "anywhere" }}>{username ? `@${username}` : "@your_username"}</p>
-              <p style={{ color: "#d4cbe1", lineHeight: 1.6, whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{bio || "Your bio will appear here."}</p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                {interests.length ? interests.map((interest) => (
-                  <span key={interest} style={{ padding: "6px 10px", borderRadius: "999px", background: "rgba(215,167,255,0.12)", color: "#e4ccff", fontSize: "12px" }}>
-                    {interest}
-                  </span>
-                )) : <span style={{ color: "#a9a0bd", fontSize: "13px" }}>Your selected interests will appear here.</span>}
-              </div>
-            </div>
-          </section>
-        ) : active === "World" ? (
-          <>
-            <div className="welcome-row">
-              <div>
-                <div className="eyebrow"><Sparkles size={14} /> A WORLD BEYOND THE ORDINARY</div>
-                <h1>Find your <span>kind of magic.</span></h1>
-                <p>Meet people, make memories, and find your connection.</p>
-              </div>
-              <div className="location-pill"><MapPin size={15} /> The Moonlit Garden</div>
-            </div>
+  function WorldPage() {
+    return (
+      <div className="world-page">
+        <div className="hero">
+          <div>
+            <span className="eyebrow">
+              AROKAVERSE WORLD
+            </span>
 
-            <section className="world-scene">
-              <div className="scene-stars"><i>✦</i><i>·</i><i>✧</i><i>·</i><i>✦</i></div>
-              <div className="moon" /><div className="scene-hill hill-back" /><div className="scene-hill hill-front" />
-              <div className="scene-tree tree-left"><div className="tree-top" /><div className="tree-trunk" /></div>
-              <div className="scene-tree tree-right"><div className="tree-top" /><div className="tree-trunk" /></div>
+            <h1>
+              Welcome back,{" "}
+              {displayName || "Explorer"}.
+            </h1>
 
-              <div className="scene-title">
-                <span className="scene-kicker"><span className="green-dot" /> YOUR WORLD IS WAITING</span>
-                <h2>A little closer<br />to something real.</h2>
-                <p>A peaceful place to meet someone new.</p>
-                <button className="primary-button" onClick={() => notify("3D exploration is coming soon")}>
-                  <Compass size={17} /> Explore the world ↗
-                </button>
-              </div>
-
-              <div className="avatar-stage">
-                <div className="avatar-glow" />
-                <div className="avatar-figure avatar-one"><div className="avatar-hair hair-one" /><div className="avatar-head"><div className="avatar-face"><i /><i /><b /></div></div><div className="avatar-neck" /><div className="avatar-body body-one" /><div className="avatar-arm arm-one" /><div className="avatar-arm arm-two" /><div className="avatar-legs" /></div>
-                <div className="avatar-figure avatar-two"><div className="avatar-hair hair-two" /><div className="avatar-head"><div className="avatar-face"><i /><i /><b /></div></div><div className="avatar-neck" /><div className="avatar-body body-two" /><div className="avatar-arm arm-one" /><div className="avatar-arm arm-two" /><div className="avatar-legs" /></div>
-                <div className="avatar-name name-one">{profile?.display_name || "You"}</div>
-                <div className="avatar-name name-two">Mira</div>
-              </div>
-
-              <div className="scene-chip chip-top"><Coffee size={15} /> Moonlight Café</div>
-              <div className="scene-chip chip-bottom"><Users size={15} /> A world to share</div>
-            </section>
-
-            <section className="section-heading">
-              <div><h2>People you might <span>vibe with</span></h2><p>Every great connection starts somewhere.</p></div>
-              <button className="text-button" onClick={() => notify("Real user discovery is a future step.")}>See all →</button>
-            </section>
-
-            <section className="people-grid">
-              {people.map((person, i) => (
-                <article className="person-card" key={person.name}>
-                  <div className="person-art" style={{ "--person-color": person.color }}>
-                    <span className="person-sparkle">✦</span>
-                    <div className={`portrait portrait-${i}`}><div className="portrait-hair" /><div className="portrait-face"><div className="portrait-eyes"><i /><i /></div><div className="portrait-smile" /></div><div className="portrait-neck" /><div className="portrait-body" /></div>
-                    <span className="distance-tag">● Demo profile</span>
-                  </div>
-                  <div className="person-info">
-                    <div className="person-title"><h3>{person.name}, {person.age}</h3><span className="verified">✦</span></div>
-                    <p>{person.vibe}</p>
-                    <div className="person-actions">
-                      <button className="message-button" onClick={() => { setSelected(person); notify(`Selected demo profile ${person.name}. Real chat is not connected yet.`); }}>
-                        <MessageCircle size={15} /> Say hello
-                      </button>
-                      <button className={`heart-button ${liked.includes(person.name) ? "liked" : ""}`} onClick={() => setLiked((old) => old.includes(person.name) ? old.filter((name) => name !== person.name) : [...old, person.name])} aria-label={`Like ${person.name}`}>
-                        <Heart size={17} fill={liked.includes(person.name) ? "currentColor" : "none"} />
-                      </button>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </section>
-
-            <footer className="footer-note"><Sparkles size={14} /> A universe for meaningful connections.<span>Be kind. Be you.</span></footer>
-          </>
-        ) : (
-          <section style={{ margin: "20px", padding: "28px", border: "1px solid rgba(215,167,255,0.2)", borderRadius: "16px", color: "#fff", background: "rgba(255,255,255,0.04)" }}>
-            <h1>{active}</h1>
-            <p style={{ color: "#cfc3e6", lineHeight: 1.6 }}>
-              This section is not connected yet. Your account and avatar profile are available now; this feature will be built separately.
+            <p>
+              Your virtual world is waiting.
+              Meet people, talk, explore and create
+              your own identity.
             </p>
-            <button className="primary-button" onClick={() => setActive("My Avatar")}>
-              <UserRound size={17} /> Set up My Avatar
+
+            <button
+              className="hero-button"
+              onClick={() => setActivePage("My Avatar")}
+            >
+              <UserRound size={18} />
+              Customize My Avatar
             </button>
-          </section>
-        )}
-      </section>
+          </div>
 
-      <aside className="chat-sidebar">
-        <div className="chat-head">
-          <div><span className="eyebrow">YOUR CONNECTIONS</span><h2>A little hello</h2></div>
-          <button className="icon-button" onClick={() => notify("Your connections are private")} aria-label="More options">•••</button>
+          <div className="hero-avatar">
+            <AvatarScene name={displayName} />
+          </div>
         </div>
 
-        <div className="chat-person">
-          <div className="chat-person-avatar" style={{ background: selected.color }}>{selected.emoji}</div>
-          <div><strong>{selected.name}</strong><span>Demo profile</span></div>
-          <button className="heart-button" onClick={() => notify("Voice calling is not connected yet.")} aria-label="Voice call"><Mic size={18} /></button>
+        <div className="section-title">
+          <div>
+            <span className="eyebrow">
+              PEOPLE AROUND YOU
+            </span>
+            <h2>Discover</h2>
+          </div>
         </div>
 
-        <div className="chat-preview-label">A CONVERSATION STARTS HERE</div>
-        <div className="chat-messages">
-          <div className="date-divider"><span>DEMO CONVERSATION</span></div>
-          <div className="message received">Hey there! 👋<br />Welcome to our little universe.</div>
-          <div className="message received">What brings you to ArokaVerse?</div>
-          {messages.map((message, i) => <div className="message sent" key={i}>{message.text}</div>)}
+        <div className="people-grid">
+          {people.map((person) => (
+            <div className="person-card" key={person.id}>
+              <div className="person-avatar">
+                <AvatarScene name={person.name} />
+              </div>
+
+              <div className="person-info">
+                <h3>
+                  {person.name}, {person.age}
+                </h3>
+
+                <div className="location">
+                  <MapPin size={14} />
+                  {person.city}
+                </div>
+
+                <p>{person.bio}</p>
+
+                <div className="tag-row">
+                  {person.interests.map((interest) => (
+                    <span key={interest}>
+                      {interest}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="card-actions">
+                  <button
+                    className={
+                      liked[person.id]
+                        ? "round-action liked"
+                        : "round-action"
+                    }
+                    onClick={() =>
+                      toggleLike(person.id)
+                    }
+                  >
+                    <Heart
+                      size={18}
+                      fill={
+                        liked[person.id]
+                          ? "currentColor"
+                          : "none"
+                      }
+                    />
+                  </button>
+
+                  <button
+                    className="connect-button"
+                    onClick={() =>
+                      setActivePage("Messages")
+                    }
+                  >
+                    <MessageCircle size={17} />
+                    Connect
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  /* ---------------------------------------------
+     OTHER PAGE
+  --------------------------------------------- */
+
+  function ComingSoonPage({ title, icon }) {
+    return (
+      <div className="coming-page">
+        <div className="coming-icon">{icon}</div>
+
+        <span className="eyebrow">
+          AROKAVERSE
+        </span>
+
+        <h1>{title}</h1>
+
+        <p>
+          This world is being built.
+          Your next virtual experience will
+          appear here soon.
+        </p>
+
+        <button
+          className="hero-button"
+          onClick={() => setActivePage("World")}
+        >
+          <ArrowLeft size={17} />
+          Back to World
+        </button>
+      </div>
+    );
+  }
+
+  /* ---------------------------------------------
+     APP SHELL
+  --------------------------------------------- */
+
+  const navItems = [
+    {
+      label: "World",
+      icon: <Globe size={19} />
+    },
+    {
+      label: "Discover",
+      icon: <Compass size={19} />
+    },
+    {
+      label: "Matches",
+      icon: <Heart size={19} />
+    },
+    {
+      label: "Messages",
+      icon: <MessageCircle size={19} />
+    },
+    {
+      label: "My Avatar",
+      icon: <UserRound size={19} />
+    }
+  ];
+
+  return (
+    <div className="app-shell">
+      <aside className="sidebar">
+        <div className="sidebar-logo">
+          <div className="logo-icon">✦</div>
+
+          <div>
+            <strong>ArokaVerse</strong>
+            <span>Virtual World</span>
+          </div>
         </div>
 
-        <form className="chat-compose" onSubmit={sendMessage}>
-          <input aria-label="Message" placeholder={`Message ${selected.name}...`} value={draft} onChange={(e) => setDraft(e.target.value)} />
-          <button type="submit" aria-label="Send message"><Send size={17} /></button>
-        </form>
+        <nav>
+          {navItems.map((item) => (
+            <button
+              key={item.label}
+              className={
+                activePage === item.label
+                  ? "nav-item active"
+                  : "nav-item"
+              }
+              onClick={() =>
+                setActivePage(item.label)
+              }
+            >
+              {item.icon}
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </nav>
 
-        <div className="chat-foot"><Volume2 size={14} /> Voice experiences not connected</div>
-        <div className="connection-card">
-          <div className="connection-icon"><Heart size={18} /></div>
-          <div><strong>Good things take a vibe.</strong><p>Be curious. Be kind. See where it goes.</p></div>
+        <div className="sidebar-bottom">
+          <div className="mini-profile">
+            <div className="mini-avatar">
+              {displayName?.charAt(0)?.toUpperCase() ||
+                "E"}
+            </div>
+
+            <div>
+              <strong>
+                {displayName || "Explorer"}
+              </strong>
+
+              <span>
+                {username
+                  ? `@${username}`
+                  : "New explorer"}
+              </span>
+            </div>
+          </div>
+
+          <button
+            className="logout-button"
+            onClick={handleLogout}
+          >
+            <LogOut size={17} />
+            Log out
+          </button>
         </div>
       </aside>
 
-      {notice && active !== "My Avatar" && <div className="toast"><Sparkles size={16} /> {notice}</div>}
-    </main>
+      <main className="main-content">
+        <header className="topbar">
+          <div className="topbar-left">
+            <span className="live-dot" />
+            <span>AROKAVERSE LIVE</span>
+          </div>
+
+          <div className="topbar-right">
+            <span className="early-access">
+              EARLY ACCESS
+            </span>
+
+            <button className="icon-button">
+              <Volume2 size={18} />
+            </button>
+
+            <button className="icon-button">
+              <Settings size={18} />
+            </button>
+          </div>
+        </header>
+
+        {activePage === "World" && <WorldPage />}
+
+        {activePage === "My Avatar" && <AvatarPage />}
+
+        {activePage === "Discover" && (
+          <ComingSoonPage
+            title="Discover"
+            icon={<Compass size={38} />}
+          />
+        )}
+
+        {activePage === "Matches" && (
+          <ComingSoonPage
+            title="Matches"
+            icon={<Heart size={38} />}
+          />
+        )}
+
+        {activePage === "Messages" && (
+          <ComingSoonPage
+            title="Messages"
+            icon={<MessageCircle size={38} />}
+          />
+        )}
+      </main>
+    </div>
   );
 }
+```
